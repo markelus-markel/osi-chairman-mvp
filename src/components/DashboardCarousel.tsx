@@ -47,7 +47,7 @@ const items: CarouselItem[] = [
 ]
 
 export default function DashboardCarousel() {
-  const [emblaRef] = useEmblaCarousel({ loop: false, dragFree: true })
+ const [emblaRef, emblaApi] = useEmblaCarousel({ loop: false, dragFree: true })
   const [selectedItem, setSelectedItem] = useState<CarouselItem | null>(null)
 
   const speak = (text: string) => {
@@ -66,6 +66,13 @@ export default function DashboardCarousel() {
   setTimeout(() => {
     speak(item.voiceText)
   }, 800) // задержка, чтобы диалог успел отрисоваться
+}
+const scrollPrev = () => {
+  if (emblaApi) emblaApi.scrollPrev()
+}
+
+const scrollNext = () => {
+  if (emblaApi) emblaApi.scrollNext()
 }
 
   return (
@@ -94,13 +101,13 @@ export default function DashboardCarousel() {
         {/* Стрелки */}
         <button
           className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/80 hover:bg-white rounded-full w-10 h-10 flex items-center justify-center shadow-md transition-opacity opacity-70 hover:opacity-100"
-          onClick={() => emblaRef.current?.scrollPrev()}
+         onClick={scrollPrev}
         >
           ←
         </button>
         <button
           className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/80 hover:bg-white rounded-full w-10 h-10 flex items-center justify-center shadow-md transition-opacity opacity-70 hover:opacity-100"
-          onClick={() => emblaRef.current?.scrollNext()}
+          onClick={scrollNext}
         >
           →
         </button>
