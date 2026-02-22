@@ -1,0 +1,29 @@
+// Настройка подключения к твоей базе Neon
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Таблица для хранения документов (сканы актов, фото квитанций)
+model Document {
+  id          String   @id @default(cuid())
+  fileName    String?  // Имя файла скана
+  docType     String   // "Акт сверки", "Квитанция" и т.д.
+  rawText     String   // Весь распознанный текст от агента
+  summary     String?  // Краткая выжимка (суть документа)
+  processedAt DateTime @default(now())
+  status      String   @default("NEW") // NEW, PROCESSED, ERROR
+}
+
+// Логи работы твоих агентов Skill MD
+model AgentLog {
+  id        String   @id @default(cuid())
+  agentName String   // Какой агент работал (Vision, Parser)
+  action    String   // Что именно сделал
+  result    String?  // Результат (успех/текст ошибки)
+  createdAt DateTime @default(now())
+}
