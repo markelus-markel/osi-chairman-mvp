@@ -1,4 +1,5 @@
 import fs from 'fs';
+// @ts-ignore
 import matter from 'gray-matter';
 import { prisma } from './prisma';
 

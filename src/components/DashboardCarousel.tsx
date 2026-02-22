@@ -1,8 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useCallback } from "react"
 import useEmblaCarousel from "embla-carousel-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardHeader, CardTitle } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Home, AlertCircle, MessageSquare, Megaphone } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -47,33 +47,34 @@ const items: CarouselItem[] = [
 ]
 
 export default function DashboardCarousel() {
- const [emblaRef, emblaApi] = useEmblaCarousel({ loop: false, dragFree: true })
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: false, dragFree: true })
   const [selectedItem, setSelectedItem] = useState<CarouselItem | null>(null)
 
   const speak = (text: string) => {
-    if ('speechSynthesis' in window) {
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       const utterance = new SpeechSynthesisUtterance(text)
       utterance.lang = 'ru-RU'
       utterance.volume = 1
       utterance.rate = 1
       utterance.pitch = 1
-      speechSynthesis.speak(utterance)
+      window.speechSynthesis.speak(utterance)
     }
   }
 
   const handleCardClick = (item: CarouselItem) => {
-  setSelectedItem(item)
-  setTimeout(() => {
-    speak(item.voiceText)
-  }, 800) // задержка, чтобы диалог успел отрисоваться
-}
-const scrollPrev = () => {
-  if (emblaApi) emblaApi.scrollPrev()
-}
+    setSelectedItem(item)
+    setTimeout(() => {
+      speak(item.voiceText)
+    }, 800)
+  }
 
-const scrollNext = () => {
-  if (emblaApi) emblaApi.scrollNext()
-}
+  const scrollPrev = useCallback(() => {
+    if (emblaApi) emblaApi.scrollPrev()
+  }, [emblaApi])
+
+  const scrollNext = useCallback(() => {
+    if (emblaApi) emblaApi.scrollNext()
+  }, [emblaApi])
 
   return (
     <>
@@ -101,20 +102,22 @@ const scrollNext = () => {
         {/* Стрелки */}
         <button
           className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/80 hover:bg-white rounded-full w-10 h-10 flex items-center justify-center shadow-md transition-opacity opacity-70 hover:opacity-100"
-         onClick={scrollPrev}
+          onClick={scrollPrev}
+          type="button"
         >
           ←
         </button>
         <button
           className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/80 hover:bg-white rounded-full w-10 h-10 flex items-center justify-center shadow-md transition-opacity opacity-70 hover:opacity-100"
           onClick={scrollNext}
+          type="button"
         >
           →
         </button>
       </div>
 
       {/* Диалог */}
-      <Dialog open={!!selectedItem} onOpenChange={() => setSelectedItem(null)}>
+      <Dialog open={!!selectedItem} onOpenChange={(open) => !open && setSelectedItem(null)}>
         <DialogContent className="max-w-4xl sm:max-w-5xl">
           <DialogHeader>
             <DialogTitle className="text-2xl">{selectedItem?.title}</DialogTitle>
@@ -122,7 +125,7 @@ const scrollNext = () => {
           <div className="p-6 space-y-6">
             <p className="text-lg leading-relaxed">{selectedItem?.voiceText}</p>
             <div className="bg-gray-100 p-6 rounded-lg">
-              <p className="text-muted-foreground">Это заглушка для экрана {selectedItem?.id}</p>
+              <p className="text-muted-foreground">Это экран управления для раздела: {selectedItem?.title}</p>
             </div>
             <div className="flex gap-4 mt-8">
               <Button onClick={() => selectedItem && speak(selectedItem.voiceText)}>
